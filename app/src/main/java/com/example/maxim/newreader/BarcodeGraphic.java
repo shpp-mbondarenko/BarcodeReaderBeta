@@ -1,5 +1,6 @@
 package com.example.maxim.newreader;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,6 +13,9 @@ import com.google.android.gms.vision.barcode.Barcode;
  * Created by Maxim on 03.07.2016.
  */
 public class BarcodeGraphic extends GraphicOverlay.Graphic {
+    //my changes
+    private Context context;
+    private CodeDetectedInterface mCallback;
 
     private int mId;
 
@@ -29,6 +33,11 @@ public class BarcodeGraphic extends GraphicOverlay.Graphic {
 
     BarcodeGraphic(GraphicOverlay overlay) {
         super(overlay);
+
+        //my changes
+        this.context = overlay.getContext();
+        mCallback = (CodeDetectedInterface) BarcodeCaptureActivity.activity.getApplicationContext();
+
 
         mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
         final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
@@ -84,6 +93,8 @@ public class BarcodeGraphic extends GraphicOverlay.Graphic {
 
         // Draws a label at the bottom of the barcode indicate the barcode value that was detected.
         canvas.drawText(barcode.rawValue, rect.left, rect.bottom, mTextPaint);
+        //my changes
+        mCallback.onCodeDetected();
     }
 }
 

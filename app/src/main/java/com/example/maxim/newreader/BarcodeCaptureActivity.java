@@ -34,7 +34,7 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
 
-public final class BarcodeCaptureActivity extends AppCompatActivity {
+public final class BarcodeCaptureActivity extends AppCompatActivity implements CodeDetectedInterface {
     private static final String TAG = "Barcode-reader";
 
     // intent request code to handle updating play services if needed.
@@ -55,7 +55,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
     // helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
-
+    public static Activity activity;
     /**
      * Initializes the UI and creates the detector pipeline.
      */
@@ -64,6 +64,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         super.onCreate(icicle);
         setContentView(R.layout.activity_main);
 
+        activity = this;
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
 
@@ -153,7 +154,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(mGraphicOverlay);
         barcodeDetector.setProcessor(
                 new MultiProcessor.Builder<>(barcodeFactory).build());
-
         if (!barcodeDetector.isOperational()) {
             // Note: The first time that an app using the barcode or face API is installed on a
             // device, GMS will download a native libraries to the device in order to do detection.
@@ -305,6 +305,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         }
     }
 
+
     /**
      * onTap is called to capture the oldest barcode currently detected and
      * return it to the caller.
@@ -336,6 +337,31 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
             Log.d(TAG,"no barcode detected");
         }
         return barcode != null;
+    }
+
+
+    //Without Tapping on barcode add him to "list of barcodes"
+    @Override
+    public void onCodeDetected() {
+        BarcodeGraphic graphic = mGraphicOverlay.getFirstGraphic();
+        Barcode barcode = null;
+        if (graphic != null) {
+            barcode = graphic.getBarcode();
+            if (barcode != null) {
+
+                Toast.makeText(getApplicationContext(), barcode.displayValue, Toast.LENGTH_LONG).show();
+//                Intent data = new Intent();
+//                data.putExtra(BarcodeObject, barcode);
+//                setResult(CommonStatusCodes.SUCCESS, data);
+//                finish();
+            }
+            else {
+                Log.d(TAG, "barcode data is null");
+            }
+        }
+        else {
+            Log.d(TAG,"no barcode detected");
+        }
     }
 
     private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
